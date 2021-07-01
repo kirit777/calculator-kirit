@@ -1,0 +1,49 @@
+StringRequest request = new StringRequest(Request.Method.POST, "https://smmservice.xyz/restaurant/change_password.php", new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                JSONObject jsonObject = null;
+                try {
+                    jsonObject = new JSONObject(response);
+                    String sucess = jsonObject.getString("success");
+                    if (sucess.equals("1"))
+                    {
+                        editor.putString("customer_password",customerpassword.getText().toString());
+                        editor.apply();
+                        Toast.makeText(getApplicationContext(),"Password Updated",Toast.LENGTH_LONG).show();
+                        customercpassword.setText("");
+                        customerpasswordold.setText("");
+                        customerpassword.setText("");
+                        progressDialog.dismiss();
+                    }
+                    else if(sucess.equals("2")){
+                        Toast.makeText(getApplicationContext(),"Old Password Wrong",Toast.LENGTH_LONG).show();
+                        progressDialog.dismiss();
+                    }
+                    else{
+                        Toast.makeText(getApplicationContext(),"Something Went Wrong Try Again plz try again"+response,Toast.LENGTH_LONG).show();
+                        progressDialog.dismiss();
+                    }
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Toast.makeText(getApplicationContext(),error.getMessage(),Toast.LENGTH_LONG).show();
+            }
+        }
+        ){
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                Map<String,String> params = new HashMap<String, String>();
+                params.put("restaurant_email",sharedPreferences.getString("restaurant_email","email"));
+                params.put("restaurant_passwordold",customerpasswordold.getText().toString());
+                params.put("restaurant_password",customerpassword.getText().toString());
+                return params;
+            }
+        };
+        RequestQueue requestQueue = Volley.newRequestQueue(getApplicationContext());
+        requestQueue.add(request);
